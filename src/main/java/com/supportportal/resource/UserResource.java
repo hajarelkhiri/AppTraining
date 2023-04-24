@@ -5,6 +5,8 @@ import com.supportportal.domain.User;
 import com.supportportal.domain.UserPrincipal;
 import com.supportportal.exception.ExceptionHandling;
 import com.supportportal.exception.domain.*;
+import com.supportportal.repository.UserRepository;
+import com.supportportal.service.EmailService;
 import com.supportportal.service.UserService;
 import com.supportportal.utility.JWTTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,7 @@ public class UserResource extends ExceptionHandling {
     public ResponseEntity<User> login(@RequestBody User user) {
         //this is the methode that's going to actually do the authentication
         //this methode will throw an exception called authenticate
+
         authenticate(user.getUsername(), user.getPassword());//if the authentication is valid
         /* we create a user ,then  we call the user service to find the user that just authenticated*/
         User loginUser = userService.findUserByUsername(user.getUsername());
@@ -68,7 +71,7 @@ public class UserResource extends ExceptionHandling {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) throws UserNotFoundException, UsernameExistException, EmailExistException, MessagingException {
+    public ResponseEntity<User> register(@RequestBody /*that's mean we need something in the body*/User user) throws UserNotFoundException, UsernameExistException, EmailExistException, MessagingException {
         User newUser = userService.register(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
         return new ResponseEntity<>(newUser, OK);
     }
@@ -77,13 +80,13 @@ public class UserResource extends ExceptionHandling {
     public ResponseEntity<User> addNewUser(@RequestParam("firstName") String firstName,
                                            @RequestParam("lastName") String lastName,
                                            @RequestParam("username") String username,
-                                           @RequestParam("departement") String departement,
                                            @RequestParam("email") String email,
                                            @RequestParam("role") String role,
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNonLocked") String isNonLocked,
-                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
-        User newUser = userService.addNewUser(firstName, lastName, username,departement,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
+
+                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException, MessagingException {
+        User newUser = userService.addNewUser(firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(newUser, OK);
     }
 
@@ -92,13 +95,13 @@ public class UserResource extends ExceptionHandling {
                                        @RequestParam("firstName") String firstName,
                                        @RequestParam("lastName") String lastName,
                                        @RequestParam("username") String username,
-                                       @RequestParam("departement") String departement,
+
                                        @RequestParam("email") String email,
                                        @RequestParam("role") String role,
                                        @RequestParam("isActive") String isActive,
                                        @RequestParam("isNonLocked") String isNonLocked,
                                        @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
-        User updatedUser = userService.updateUser(currentUsername, firstName, lastName, departement,username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
+        User updatedUser = userService.updateUser(currentUsername,firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(updatedUser, OK);
     }
     
@@ -110,6 +113,11 @@ public class UserResource extends ExceptionHandling {
 
     @GetMapping("/list")
     public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getUsers();
+        return new ResponseEntity<>(users, OK);
+    }
+    @GetMapping("/list/profile")
+    public ResponseEntity<List<User>> getProfileUsers() {
         List<User> users = userService.getUsers();
         return new ResponseEntity<>(users, OK);
     }
@@ -168,5 +176,15 @@ public class UserResource extends ExceptionHandling {
 
     private void authenticate(String username, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+    }
+
+    @Autowired
+    private UserRepository userRepository; // Assuming you have a UserRepository to interact with the database
+
+    @GetMapping("/user/last-id")
+    public ResponseEntity<Long> getLastUserId() {
+        Long lastUserId = userRepository.findTopByOrderByIdDesc().getId(); // Retrieve the last user id from the database
+        return ResponseEntity.ok(lastUserId); // Send the last user id as the response
+
     }
 }

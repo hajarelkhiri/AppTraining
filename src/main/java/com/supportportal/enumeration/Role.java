@@ -4,7 +4,7 @@ import static com.supportportal.constant.Authority.*;
 
 public enum Role {
     ROLE_USER(USER_AUTHORITIES),
-    ROLE_Former(FORMER_AUTHORITIES),
+    ROLE_FORMER(FORMER_AUTHORITIES),
 
     ROLE_SUPER_ADMIN(SUPER_ADMIN_AUTHORITIES);
 

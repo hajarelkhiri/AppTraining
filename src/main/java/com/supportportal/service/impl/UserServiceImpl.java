@@ -15,11 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -96,12 +99,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setProfileImageUrl(getTemporaryProfileImageUrl(username));
         userRepository.save(user);
         LOGGER.info("New user password: " + password);
-        emailService.sendNewPasswordEmail(firstName, password, email);
+        //emailService.sendNewPasswordEmail(firstName, password, email);
         return user;
     }
 
     @Override
-    public User addNewUser(String firstName, String lastName, String departement,String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
+    public User addNewUser(String firstName, String lastName,String username, String email ,String role , boolean isNonLocked, boolean isActive, MultipartFile profileImage  ) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException, MessagingException {
         validateNewUsernameAndEmail(EMPTY, username, email);
         User user = new User();
         String password = generatePassword();
@@ -110,7 +113,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setLastName(lastName);
         user.setJoinDate(new Date());
         user.setUsername(username);
-        user.setDepartement(departement);
         user.setEmail(email);
         user.setPassword(encodePassword(password));
         user.setActive(isActive);
@@ -122,16 +124,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         saveProfileImage(user, profileImage);
         //This is an informational message with a parameter password
         LOGGER.info("New user password: " + password);
+        emailService.sendNewPasswordEmail(username, password, email);
         return user;
     }
 
     @Override
-    public User updateUser(String currentUsername,String newFirstName, String newLastName, String newdepartement,String newUsername, String newEmail, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
+    public User updateUser(String currentUsername,String newFirstName, String newLastName,String newUsername, String newEmail, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
         User currentUser = validateNewUsernameAndEmail(currentUsername, newUsername, newEmail);
+
         currentUser.setFirstName(newFirstName);
         currentUser.setLastName(newLastName);
         currentUser.setUsername(newUsername);
-        currentUser.setDepartement(newdepartement);
         currentUser.setEmail(newEmail);
         currentUser.setActive(isActive);
         currentUser.setNotLocked(isNonLocked);
@@ -167,6 +170,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         return userRepository.findAll();
     }
+
 
     @Override
     public User findUserByUsername(String username) {

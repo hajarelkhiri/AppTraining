@@ -25,10 +25,12 @@ public class User implements Serializable {
     private Date lastLoginDateDisplay;
     private Date joinDate;
     private String role; //ROLE_USER{ read, edit }, ROLE_ADMIN {delete}
-    private  String departement;
+
     private String[] authorities;
     private boolean isActive;
     private boolean isNotLocked;
+
+
 
     public User(){}
 
@@ -45,15 +47,12 @@ public class User implements Serializable {
         this.lastLoginDateDisplay = lastLoginDateDisplay;
         this.joinDate = joinDate;
         this.role = role;
-        this.departement = departement;
         this.authorities = authorities;
         this.isActive = isActive;
         this.isNotLocked = isNotLocked;
+
     }
 
-    public String getDepartement() {
-        return departement;
-    }
 
 
 
@@ -177,6 +176,4 @@ public class User implements Serializable {
         isNotLocked = notLocked;
     }
 
-    public void setDepartement(String departement) {
     }
-}

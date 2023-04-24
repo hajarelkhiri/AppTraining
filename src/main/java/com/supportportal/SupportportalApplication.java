@@ -1,5 +1,7 @@
 package com.supportportal;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +17,7 @@ import java.util.Collections;
 import static com.supportportal.constant.FileConstant.USER_FOLDER;
 
 @SpringBootApplication
-public class SupportportalApplication {
+public class SupportportalApplication  implements CommandLineRunner {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SupportportalApplication.class, args);
@@ -41,5 +43,12 @@ public class SupportportalApplication {
 	@Bean
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	@Autowired
+	private CoursRepository coursRepository;
+	@Override
+	public void run(String... args) throws Exception {
+
 	}
 }
