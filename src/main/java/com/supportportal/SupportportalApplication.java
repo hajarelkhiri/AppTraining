@@ -45,8 +45,7 @@ public class SupportportalApplication  implements CommandLineRunner {
 		return new BCryptPasswordEncoder();
 	}
 
-	@Autowired
-	private CoursRepository coursRepository;
+
 	@Override
 	public void run(String... args) throws Exception {
 
